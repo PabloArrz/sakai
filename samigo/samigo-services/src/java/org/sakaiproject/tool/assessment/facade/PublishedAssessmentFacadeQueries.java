@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.Vector;
@@ -346,6 +347,8 @@ public class PublishedAssessmentFacadeQueries extends HibernateDaoSupport implem
 					sectionMetaData.getEntry());
 			h.add(publishedSectionMetaData);
 		}
+		Random rand = new Random(System.currentTimeMillis());
+		h.add(new PublishedSectionMetaData(publishedSection, SectionDataIfc.RANDOMIZATION_SEED, String.valueOf(rand.nextLong())));
 		return h;
 	}
 
