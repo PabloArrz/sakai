@@ -39,7 +39,7 @@ import org.sakaiproject.tool.assessment.ui.listener.select.SelectActionListener;
 import org.sakaiproject.tool.cover.ToolManager;
 
 import lombok.extern.slf4j.Slf4j;
-
+import org.sakaiproject.tool.cover.SessionManager;
 /* For authorization */
 @Slf4j
 @ManagedBean(name="authorization")
@@ -57,6 +57,7 @@ public class AuthorizationBean implements Serializable {
   private boolean adminTemplatePrivilege = false;
   private boolean adminQuestionPoolPrivilege = false;
   private Boolean superUser = null;
+  private SessionManager sessionManager;
 
   public AuthorizationBean(){
   }
@@ -431,8 +432,8 @@ public class AuthorizationBean implements Serializable {
     return false;
   }
 
-  public boolean isUserAllowedToTakeAssessment(final String assessmentId) {
-    if (!isAssessmentInSite(assessmentId, true)) { 
+  public boolean isUserAllowedToTakeAssessment(final String assessmentId, String siteId) {
+    if (!isAssessmentInSite(assessmentId, siteId, true)) {  
       return false;
     }
 
@@ -444,12 +445,15 @@ public class AuthorizationBean implements Serializable {
     return getCreateAssessment();
   }
 
-  // Check whether the assessment belongs to the given site
-  public static boolean isAssessmentInSite(final String assessmentId, String siteId, final boolean published) {
-	//Try to get the site Id
-	if (siteId == null) {
-		siteId = AgentFacade.getCurrentSiteId();
-	}
+  // Check whether the assessment belongs to the given site                             
+  public static boolean isAssessmentInSite(final String assessmentId, String siteId, final boolean published) {                   
+	//Try to get the site Id                      
+  if (StringUtils.isBlank(siteId)) {                
+    siteId = AgentFacade.getCurrentSiteId();  
+    if (StringUtils.isBlank(siteId)) {                  
+    siteId = SessionManager.getCurrentToolSession().getAttribute("site.instance.id").toString();
+    }
+    }
     // get list of site that this published assessment has been released to
     List<AuthorizationData> l = PersistenceService.getInstance().getAuthzQueriesFacade().getAuthorizationByFunctionAndQualifier(published ? "OWN_PUBLISHED_ASSESSMENT" : "EDIT_ASSESSMENT", assessmentId);
 

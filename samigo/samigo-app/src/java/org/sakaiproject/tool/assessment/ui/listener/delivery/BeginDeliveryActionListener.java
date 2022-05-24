@@ -96,6 +96,7 @@ public class BeginDeliveryActionListener implements ActionListener
     String actionString = ContextUtil.lookupParam("actionString");
     String publishedId = ContextUtil.lookupParam("publishedId");
     String assessmentId = (String)ContextUtil.lookupParam("assessmentId");
+    String siteId = (String)ContextUtil.lookupParam("siteId");
 
     if (StringUtils.isNotBlank(actionString)) {
       // if actionString is null, likely that action & actionString has been set already, 
@@ -114,7 +115,7 @@ public class BeginDeliveryActionListener implements ActionListener
     }
 
     int action = delivery.getActionMode();
-    PublishedAssessmentFacade pub = getPublishedAssessmentBasedOnAction(action, delivery, assessmentId, publishedId);
+    PublishedAssessmentFacade pub = getPublishedAssessmentBasedOnAction(action, delivery, assessmentId, publishedId, siteId);
 
     if(pub == null){
     	delivery.setOutcome("poolUpdateError");
@@ -137,7 +138,7 @@ public class BeginDeliveryActionListener implements ActionListener
         }
       }
     } else if (DeliveryBean.REVIEW_ASSESSMENT == action || DeliveryBean.TAKE_ASSESSMENT == action) {
-      if (!releaseToAnonymous && !authzBean.isUserAllowedToTakeAssessment(pub.getPublishedAssessmentId().toString())) {
+      if (releaseToAnonymous && !authzBean.isUserAllowedToTakeAssessment(assessmentId, siteId)) {
         throw new IllegalArgumentException("User does not have permission to view assessment id " + pub.getPublishedAssessmentId());
       }
     }
@@ -484,7 +485,7 @@ public class BeginDeliveryActionListener implements ActionListener
       }
   }
 
-  private PublishedAssessmentFacade getPublishedAssessmentBasedOnAction(int action, DeliveryBean delivery, String assessmentId, String publishedId){
+  private PublishedAssessmentFacade getPublishedAssessmentBasedOnAction(int action, DeliveryBean delivery, String assessmentId, String publishedId, String siteId){
     AssessmentService assessmentService = new AssessmentService();
     PublishedAssessmentService publishedAssessmentService = new PublishedAssessmentService();
     PublishedAssessmentFacade pub = null;
